@@ -58,7 +58,7 @@ main() {
     fi
     export PATH="$NODE_DIR/bin:$PATH"
   fi
-  (cd "$BR/MaxMSP_Agent" && npm install --no-audit --no-fund --loglevel=error </dev/null >/dev/null)
+  (cd "$BR/MaxMSP_Agent" && npm install --no-audit --no-fund --no-update-notifier --loglevel=error </dev/null >/dev/null)
   [ -d "$BR/MaxMSP_Agent/node_modules/socket.io" ] || die "npm install didn't produce socket.io."
 
   say "Connecting it to Claude Desktop"
