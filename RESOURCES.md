@@ -63,3 +63,10 @@ Key facts:
 
 - An official JSON Schema (none exists, so we'll have to write one).
 - A headless or CLI Max for automated load-testing (none known, though RNBO's C++ export can compile and run without Max).
+
+## Decisions (interview round 1)
+
+- **Verification:** a live link to Max 9 on the user's machine, in the style of MaxMSP-MCP-Server. Max will run **unlicensed**, so it can open, run and script patches but not save them. That suits us: Claude writes the `.maxpat` files, and Max only loads, runs and inspects them. (A 30-day full trial is also available if needed.)
+- **Scope:** Max + MSP audio, plus gen~/RNBO. Max for Live and Jitter are out for now.
+- **Engine:** build on py2max. Our value is the knowledge layer: idioms, port-count rules, examples and checks.
+- **Use cases to optimise for:** synths and instruments, effects and audio processing, and generative or algorithmic patches.
