@@ -78,3 +78,18 @@ Key facts:
 - **Interaction:** primarily from **chat sessions**. Skills must work offline (generate, lint, hand off the file). A live MCP connection to Max is an optional extra for verification.
 - **Packaging:** a Claude Code plugin can bundle skills *and* an MCP server config, so we don't have to choose. Plan: skills plus py2max scripts first, then an optional MCP server that wraps or extends MaxMSP-MCP-Server.
 - **Next research:** an example patch corpus, the GenExpr language reference, and robenkleene's existing skill.
+
+## MaxMSP-MCP-Server: live-test findings
+
+The user set it up on their Mac (Max 9 + Claude Desktop) on 2026-11-04. A build test (`cycle~ 440` → `*~ 0.1` → `ezdac~` L+R) created and connected the objects correctly. Each quirk below was checked against the bridge source (`MaxMSP_Agent/max_mcp.js`, `max_mcp_node.js`).
+
+- **Startup order matters.** `server.py` connects to the Node socket.io server that `script start` opens inside Max (port 5002). If Max isn't listening yet, the MCP server exits with `Connect call failed`. Open Max first, then Claude Desktop.
+- **Install bug:** `install.py` crashes with `KeyError: 'mcpServers'` when `claude_desktop_config.json` already exists without that key. Fix: `config_data.setdefault(mcp_name, {})`.
+- **Both reads cover the same patcher.** `get_objects_in_patch` and `get_avoid_rect_position` both use `this.patcher`, which is the run-agent subpatch, so the "install" tab and other open windows aren't seen. They split it differently:
+  - The object listing skips the bridge's own objects (their `varname` starts with `maxmcpid`). It does **not** skip unnamed objects. Instead it silently gives them a `varname` of the form `obj-N`, which changes the user's patch. So reading the stock demo returns nothing, but a hand-built patch would still be listed.
+  - The avoid-rect is the bounding box of **only** the bridge's own objects, which is why it came back non-empty while the listing was empty.
+- **The avoid-rect arrives garbled.** It is pretty-printed JSON sent out as Max atoms, which Node rejoins with `msg.join("")`, so the numbers run together (`755281034568`). The order is left, top, right, bottom. Proper fix: send it through the v8 `add_boxtext` path that `get_objects_in_patch` uses.
+- **Two rect formats.** The live JS `obj.rect` is **[left, top, right, bottom]**, but `patching_rect` in `.maxpat` JSON is **[x, y, width, height]**. Convert at the boundary.
+- **Object names change.** `maxclass` for operator objects reads back as an alias: `*~` comes back as `times~`. We need an alias table (py2max has `maxref/aliases.py`).
+- **No confirmation.** `add_object` and `connect_objects` don't send a reply, and failures only `post()` to the Max console. Always read the patch back to check a cord was made.
+- **New objects need a `varname`.** Every object the bridge adds must have one, because cords are made by name (`getnamed`).
