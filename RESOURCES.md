@@ -70,3 +70,11 @@ Key facts:
 - **Scope:** Max + MSP audio, plus gen~/RNBO. Max for Live and Jitter are out for now.
 - **Engine:** build on py2max. Our value is the knowledge layer: idioms, port-count rules, examples and checks.
 - **Use cases to optimise for:** synths and instruments, effects and audio processing, and generative or algorithmic patches.
+
+## Decisions (interview round 2)
+
+- **Max:** full Max 9 licence bought (saving works). The user will try to set up an MCP bridge on it.
+- **RNBO:** not purchased, so it's dropped. gen~/GenExpr stays in scope.
+- **Interaction:** primarily from **chat sessions**. Skills must work offline (generate, lint, hand off the file). A live MCP connection to Max is an optional extra for verification.
+- **Packaging:** a Claude Code plugin can bundle skills *and* an MCP server config, so we don't have to choose. Plan: skills plus py2max scripts first, then an optional MCP server that wraps or extends MaxMSP-MCP-Server.
+- **Next research:** an example patch corpus, the GenExpr language reference, and robenkleene's existing skill.
